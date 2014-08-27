@@ -77,7 +77,7 @@ class LayerGroup(ResourceInfo):
         self.writers = dict(
             name = write_string("name"),
             title = write_string("title"),
-            abstract = write_string("abstract"),
+            abstract = write_string("abstractTxt"),
             mode = write_string("mode"),
             styles = _write_styles,
             layers = lambda b,l: _write_layers_mixed(b, l, parent, element),
