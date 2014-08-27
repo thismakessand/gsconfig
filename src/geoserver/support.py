@@ -67,7 +67,7 @@ def xml_property(path, converter = lambda x: x.text, default=None):
     return property(getter, setter, delete)
 
 def bbox(node):
-    if node is not None: 
+    if node is not None:
         minx = node.find("minx")
         maxx = node.find("maxx")
         miny = node.find("miny")
@@ -77,7 +77,7 @@ def bbox(node):
 
         if (None not in [minx, maxx, miny, maxy]):
             return (minx.text, maxx.text, miny.text, maxy.text, crs)
-        else: 
+        else:
             return None
     else:
         return None
@@ -185,7 +185,7 @@ class ResourceInfo(object):
         builder.end(self.resource_type)
         msg = tostring(builder.close())
         return msg
-                
+
 def prepare_upload_bundle(name, data):
     """GeoServer's REST API uses ZIP archives as containers for file formats such
     as Shapefile and WorldImage which include several 'boxcar' files alongside
@@ -305,7 +305,7 @@ def md_entry(node):
         value = md_dimension_info(key, node.find("dimensionInfo"))
     else:
         value = node.text
-        
+
     if None in [key, value]:
         return None
     else:

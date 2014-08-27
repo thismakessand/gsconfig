@@ -309,7 +309,7 @@ class Catalog(object):
         headers, response = self.http.request(wms_url, "POST", data, headers)
 
         self._cache.clear()
-        if headers.status < 200 or headers.status > 299: raise UploadError(response) 
+        if headers.status < 200 or headers.status > 299: raise UploadError(response)
         return self.get_resource(name, store=store, workspace=workspace)
 
     def add_data_to_store(self, store, name, data, workspace=None, overwrite = False, charset = None):
@@ -334,8 +334,8 @@ class Catalog(object):
             params["charset"] = charset
 
         headers = { 'Content-Type': 'application/zip', 'Accept': 'application/xml' }
-        upload_url = url(self.service_url, 
-            ["workspaces", workspace, "datastores", store, "file.shp"], params) 
+        upload_url = url(self.service_url,
+            ["workspaces", workspace, "datastores", store, "file.shp"], params)
 
         with open(bundle, "rb") as f:
             data = f.read()
@@ -544,7 +544,7 @@ class Catalog(object):
         '''Print granules of an existing imagemosaic'''
         params = dict()
         if filter is not None:
-            params['filter'] = filter        
+            params['filter'] = filter
         cs_url = url(self.service_url,
             ["workspaces", store.workspace.name, "coveragestores", store.name, "coverages", coverage, "index/granules.json"], params)
         # GET /workspaces/<ws>/coveragestores/<name>/coverages/<coverage>/index/granules.json
@@ -588,7 +588,7 @@ class Catalog(object):
                 store = self.get_store(store, workspace)
             if store is not None:
                 return store.get_resources(name)
-        
+
         if store is not None:
             candidates = [s for s in self.get_resources(store) if s.name == name]
             if len(candidates) == 0:
@@ -660,7 +660,7 @@ class Catalog(object):
         return lyrs
 
     def get_layergroup(self, name=None):
-        try: 
+        try:
             group_url = url(self.service_url, ["layergroups", name + ".xml"])
             group = self.get_xml(group_url)
             return LayerGroup(self, group.find("name").text)
@@ -671,11 +671,11 @@ class Catalog(object):
         groups = self.get_xml("%s/layergroups.xml" % self.service_url)
         return [LayerGroup(self, g.find("name").text) for g in groups.findall("layerGroup")]
 
-    def create_layergroup(self, name, layers = (), styles = (), bounds = None):
+    def create_layergroup(self, name, layers = (), styles = (), bounds = None, title = None, abstract = None, mode = "SINGLE"):
         if any(g.name == name for g in self.get_layergroups()):
             raise ConflictingDataError("LayerGroup named %s already exists!" % name)
         else:
-            return UnsavedLayerGroup(self, name, layers, styles, bounds)
+            return UnsavedLayerGroup(self, name, layers, styles, bounds, title, abstract, mode)
 
     def get_style(self, name, workspace=None):
         '''Find a Style in the catalog if one exists that matches the given name.

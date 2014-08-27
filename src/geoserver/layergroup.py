@@ -10,7 +10,7 @@ def _maybe_text(n):
 def _layer_list(node, element):
     if node is not None:
         return [_maybe_text(n.find("name")) for n in node.findall(element)]
-        
+
 def _style_list(node):
     if node is not None:
         return [_maybe_text(n.find("name")) for n in node.findall("style")]
@@ -22,6 +22,19 @@ def _write_layers(builder, layers, parent, element, attributes):
         if l is not None:
             builder.start("name", dict())
             builder.data(l)
+            builder.end("name")
+        builder.end(element)
+    builder.end(parent)
+
+def _write_layers_mixed(builder, layers, parent, element):
+    builder.start(parent, dict())
+    for l in layers:
+        attributes = {'type': l['attribute']}
+        lyrName = l['name']
+        builder.start(element, attributes or dict())
+        if l is not None:
+            builder.start("name", dict())
+            builder.data(lyrName)
             builder.end("name")
         builder.end(element)
     builder.end(parent)
@@ -39,7 +52,7 @@ def _write_styles(builder, styles):
 
 class LayerGroup(ResourceInfo):
     """
-    Represents a layer group in geoserver 
+    Represents a layer group in geoserver
     """
 
     resource_type = "layerGroup"
@@ -58,14 +71,16 @@ class LayerGroup(ResourceInfo):
         if self.catalog.gsversion() == "2.2.x":
             parent, element, attributes = "layers", "layer", None
         else:
-            parent, element, attributes = "publishables", "published", {'type':'layer'}
+            parent, element = "publishables", "published"
         self._layer_parent = parent
         self._layer_element = element
-        self._layer_attributes = attributes
         self.writers = dict(
             name = write_string("name"),
+            title = write_string("title"),
+            abstract = write_string("abstract"),
+            mode = write_string("mode"),
             styles = _write_styles,
-            layers = lambda b,l: _write_layers(b, l, parent, element, attributes),
+            layers = lambda b,l: _write_layers_mixed(b, l, parent, element),
             bounds = write_bbox("bounds")
         )
 
@@ -90,7 +105,7 @@ class LayerGroup(ResourceInfo):
 
     def _layers_delete(self):
         self.dirty["layers"] = None
-    
+
     layers =  property(_layers_getter, _layers_setter, _layers_delete)
 
     def __str__(self):
@@ -100,10 +115,10 @@ class LayerGroup(ResourceInfo):
 
 class UnsavedLayerGroup(LayerGroup):
     save_method = "POST"
-    def __init__(self, catalog, name, layers, styles, bounds):
+    def __init__(self, catalog, name, layers, styles, bounds, title, abstract, mode):
         super(UnsavedLayerGroup, self).__init__(catalog, name)
         bounds = bounds if bounds is not None else ("-180","180","-90","90","EPSG:4326")
-        self.dirty.update(name = name, layers = layers, styles = styles, bounds = bounds)
+        self.dirty.update(name = name, layers = layers, styles = styles, bounds = bounds, title = title, abstract = abstract, mode = mode)
 
     @property
     def href(self):
